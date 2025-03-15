@@ -41,7 +41,7 @@ export default function CollectionPage() {
     fetch("http://localhost:8000/expansions/")
       .then((res) => res.json())
       .then((data) => {
-        const expansionList = Object.values(data.expansions).flat();
+        const expansionList = Object.values(data.expansions).flat() as Expansion[];
         setExpansions(expansionList);
         if (expansionList.length > 0) setSelectedExpansion(expansionList[0].id);
       });
@@ -167,7 +167,7 @@ export default function CollectionPage() {
               <td className="p-2">{card.name}</td>
               <td className="p-2">{card.type}</td>
               <td className="p-2">{card.color || "N/A"}</td>
-              <td className="p-2 flex items-center">
+              <td className="p-2 align-middle">
                 {card.rarity && rarityMap[card.rarity]?.image ? (
                   <img
                     src={rarityMap[card.rarity].image}
@@ -193,7 +193,11 @@ export default function CollectionPage() {
       </table>
       {/* Modal for card details */}
       <Transition show={!!selectedCard} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => setSelectedCard(null)}>
+        <Dialog
+          as="div"
+          className="relative z-50"
+          onClose={() => setSelectedCard(null)}
+        >
           {/* This is the dimmed background effect */}
           <div className="fixed inset-0 bg-black/20 backdrop-blur-md" />
 
