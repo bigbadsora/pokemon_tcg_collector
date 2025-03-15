@@ -12,6 +12,11 @@ interface Card {
   image_url: string;
   quantity: number;
   collection_number: number;
+  evolves_from: string | null;
+  number: string;
+  hp: string | null;
+  types: string | null;
+  supertype: string;
 }
 
 interface Expansion {
@@ -53,9 +58,12 @@ export default function CollectionPage() {
   }, [selectedExpansion]);
 
   const updateQuantity = async (cardId: string, change: number) => {
-    await fetch(`http://localhost:8000/collection/update/?card_id=${cardId}&change=${change}`, {
-      method: "POST",
-    });
+    await fetch(
+      `http://localhost:8000/collection/update/?card_id=${cardId}&change=${change}`,
+      {
+        method: "POST",
+      }
+    );
 
     setCollection((prevCollection) =>
       prevCollection.map((c) =>
@@ -83,7 +91,10 @@ export default function CollectionPage() {
               {Object.entries(stats.rarities).map(([rarity, count]) => {
                 const rarityData = rarityMap[rarity] || { name: rarity };
                 return (
-                  <div key={rarity} className="flex items-center space-x-1 text-sm">
+                  <div
+                    key={rarity}
+                    className="flex items-center space-x-1 text-sm"
+                  >
                     {rarityData.image ? (
                       <img
                         src={rarityData.image}
@@ -136,22 +147,22 @@ export default function CollectionPage() {
             <tr key={card.card_id} className="border-t">
               <td className="p-2 text-center">{card.collection_number}</td>
               <td className="p-2 text-center">
-  <div className="flex items-center justify-center space-x-1">
-    <button
-      onClick={() => updateQuantity(card.card_id, -1)}
-      className="text-sm px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
-    >
-      -
-    </button>
-    <span className="w-6 text-center">{card.quantity}</span>
-    <button
-      onClick={() => updateQuantity(card.card_id, 1)}
-      className="text-sm px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
-    >
-      +
-    </button>
-  </div>
-</td>
+                <div className="flex items-center justify-center space-x-1">
+                  <button
+                    onClick={() => updateQuantity(card.card_id, -1)}
+                    className="text-sm px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                  >
+                    -
+                  </button>
+                  <span className="w-6 text-center">{card.quantity}</span>
+                  <button
+                    onClick={() => updateQuantity(card.card_id, 1)}
+                    className="text-sm px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                  >
+                    +
+                  </button>
+                </div>
+              </td>
 
               <td className="p-2">{card.name}</td>
               <td className="p-2">{card.type}</td>
@@ -169,7 +180,10 @@ export default function CollectionPage() {
                 )}
               </td>
               <td className="p-2 text-center">
-                <button onClick={() => setSelectedCard(card)} className="px-3 py-1 bg-blue-500 text-white rounded">
+                <button
+                  onClick={() => setSelectedCard(card)}
+                  className="px-3 py-1 bg-blue-500 text-white rounded cursor-pointer"
+                >
                   🔍
                 </button>
               </td>
@@ -177,6 +191,51 @@ export default function CollectionPage() {
           ))}
         </tbody>
       </table>
+      {/* Modal for card details */}
+      <Transition show={!!selectedCard} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setSelectedCard(null)}>
+          {/* This is the dimmed background effect */}
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-md" />
+
+          <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
+            <Dialog.Panel className="bg-white p-6 rounded-lg shadow-lg max-w-3xl w-full relative">
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedCard(null)}
+                className="absolute top-2 right-2 text-gray-600 hover:text-black text-xl"
+              >
+                ✕
+              </button>
+
+              {/* Card Image (3x size) */}
+              <img
+                src={selectedCard?.image_url}
+                alt={selectedCard?.name}
+                className="w-full h-[500px] object-contain"
+              />
+
+              <h2 className="text-2xl font-bold mt-4">{selectedCard?.name}</h2>
+              <p className="text-sm text-gray-500">
+                #{selectedCard?.number} - {selectedCard?.rarity || "Common"}
+              </p>
+              <p className="mt-2">
+                <strong>HP:</strong> {selectedCard?.hp || "N/A"}
+              </p>
+              <p className="mt-1">
+                <strong>Type:</strong> {selectedCard?.types || "N/A"}
+              </p>
+              <p className="mt-1">
+                <strong>Supertype:</strong> {selectedCard?.supertype}
+              </p>
+              {selectedCard?.evolves_from && (
+                <p className="mt-1">
+                  <strong>Evolves from:</strong> {selectedCard.evolves_from}
+                </p>
+              )}
+            </Dialog.Panel>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 }
