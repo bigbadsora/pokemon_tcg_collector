@@ -322,10 +322,6 @@ def get_collection_by_expansion(expansion_id):
         }
     }
 
-
-
-
-
 def update_card_quantity(card_id, change):
     """Increase or decrease the quantity of a collected card while preserving collection_number."""
     conn = get_db_connection()

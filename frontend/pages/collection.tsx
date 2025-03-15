@@ -52,6 +52,20 @@ export default function CollectionPage() {
       });
   }, [selectedExpansion]);
 
+  const updateQuantity = async (cardId: string, change: number) => {
+    await fetch(`http://localhost:8000/collection/update/?card_id=${cardId}&change=${change}`, {
+      method: "POST",
+    });
+
+    setCollection((prevCollection) =>
+      prevCollection.map((c) =>
+        c.card_id === cardId
+          ? { ...c, quantity: Math.max(0, c.quantity + change) }
+          : c
+      )
+    );
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">My Collection</h1>
@@ -118,73 +132,50 @@ export default function CollectionPage() {
           </tr>
         </thead>
         <tbody>
-  {collection.map((card) => (
-    <tr key={card.card_id} className="border-t">
-      <td className="p-2 text-center">{card.collection_number}</td>
+          {collection.map((card) => (
+            <tr key={card.card_id} className="border-t">
+              <td className="p-2 text-center">{card.collection_number}</td>
+              <td className="p-2 text-center">
+  <div className="flex items-center justify-center space-x-1">
+    <button
+      onClick={() => updateQuantity(card.card_id, -1)}
+      className="text-sm px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+    >
+      -
+    </button>
+    <span className="w-6 text-center">{card.quantity}</span>
+    <button
+      onClick={() => updateQuantity(card.card_id, 1)}
+      className="text-sm px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+    >
+      +
+    </button>
+  </div>
+</td>
 
-      {/* Quantity Column with +/- Buttons */}
-      <td className="p-2 text-center flex items-center justify-center space-x-2">
-        <button
-          onClick={() =>
-            setCollection((prevCollection) =>
-              prevCollection.map((c) =>
-                c.card_id === card.card_id
-                  ? { ...c, quantity: Math.max(0, c.quantity - 1) }
-                  : c
-              )
-            )
-          }
-          className="px-2 py-1 bg-red-500 text-white rounded"
-        >
-          ➖
-        </button>
-        <span className="w-6 text-center">{card.quantity}</span>
-        <button
-          onClick={() =>
-            setCollection((prevCollection) =>
-              prevCollection.map((c) =>
-                c.card_id === card.card_id
-                  ? { ...c, quantity: c.quantity + 1 }
-                  : c
-              )
-            )
-          }
-          className="px-2 py-1 bg-green-500 text-white rounded"
-        >
-          ➕
-        </button>
-      </td>
-
-      <td className="p-2">{card.name}</td>
-      <td className="p-2">{card.type}</td>
-      <td className="p-2">{card.color || "N/A"}</td>
-
-      {/* Rarity with Symbol */}
-      <td className="p-2 flex items-center">
-        {card.rarity && rarityMap[card.rarity]?.image ? (
-          <img
-            src={rarityMap[card.rarity].image}
-            alt={card.rarity}
-            title={card.rarity}
-            className="w-4 h-4 mr-1"
-          />
-        ) : (
-          <span>{card.rarity || "Common"}</span>
-        )}
-      </td>
-
-      {/* View Button */}
-      <td className="p-2 text-center">
-        <button
-          onClick={() => setSelectedCard(card)}
-          className="px-3 py-1 bg-blue-500 text-white rounded"
-        >
-          🔍
-        </button>
-      </td>
-    </tr>
-  ))}
-</tbody>
+              <td className="p-2">{card.name}</td>
+              <td className="p-2">{card.type}</td>
+              <td className="p-2">{card.color || "N/A"}</td>
+              <td className="p-2 flex items-center">
+                {card.rarity && rarityMap[card.rarity]?.image ? (
+                  <img
+                    src={rarityMap[card.rarity].image}
+                    alt={card.rarity}
+                    title={card.rarity}
+                    className="w-4 h-4 mr-1"
+                  />
+                ) : (
+                  <span>{card.rarity || "Common"}</span>
+                )}
+              </td>
+              <td className="p-2 text-center">
+                <button onClick={() => setSelectedCard(card)} className="px-3 py-1 bg-blue-500 text-white rounded">
+                  🔍
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
       </table>
     </div>
   );

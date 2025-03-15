@@ -61,9 +61,9 @@ export default function ExpansionDetail() {
       <Transition show={!!selectedCard} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setSelectedCard(null)}>
           {/* This is the dimmed background effect */}
-          <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-md transition-opacity" />
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-md" />
 
-          <div className="fixed inset-0 flex items-center justify-center p-4">
+          <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
             <Dialog.Panel className="bg-white p-6 rounded-lg shadow-lg max-w-3xl w-full relative">
               {/* Close Button */}
               <button
