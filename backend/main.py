@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from database import get_expansions, get_cards_by_expansion, get_cards_by_name, update_card_quantity
+from database import get_expansions, get_cards_by_expansion, get_cards_by_name, update_card_quantity, update_expansions
 
 app = FastAPI()
 
@@ -56,3 +56,21 @@ def update_collection(card_id: str, change: int):
     if not result:
         raise HTTPException(status_code=400, detail="Failed to update quantity")
     return {"message": "Quantity updated"}
+
+@app.post("/expansions/update/")
+def update_expansions_endpoint():
+    """Endpoint to update expansions by checking for new releases from the PokémonTCG API."""
+    try:
+        update_expansions()
+        return {"message": "Expansions updated successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/expansion/{set_id}/cards/update")
+def update_expansion_cards(set_id: str):
+    """Fetch and store missing cards for a specific expansion chosen by the user."""
+    from database import fetch_cards_for_expansion  # Import the new function
+    result = fetch_cards_for_expansion(set_id)
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail=result.get("error", "Failed to fetch cards."))
+    return result

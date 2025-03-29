@@ -37,11 +37,19 @@ export default function CollectionPage() {
   const [stats, setStats] = useState<CollectionStats | null>(null);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
 
+  // New state for the view mode toggle (Table or Binder)
+  const [viewMode, setViewMode] = useState("Table");
+  const toggleViewMode = () => {
+    setViewMode((prev) => (prev === "Table" ? "Binder" : "Table"));
+  };
+
   useEffect(() => {
     fetch("http://localhost:8000/expansions/")
       .then((res) => res.json())
       .then((data) => {
-        const expansionList = Object.values(data.expansions).flat() as Expansion[];
+        const expansionList = Object.values(
+          data.expansions
+        ).flat() as Expansion[];
         setExpansions(expansionList);
         if (expansionList.length > 0) setSelectedExpansion(expansionList[0].id);
       });
@@ -76,17 +84,34 @@ export default function CollectionPage() {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">My Collection</h1>
+      {/* Header with "My Collection" and Toggle Switch */}
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold">My Collection</h1>
+        <div className="flex flex-col items-center">
+          <span className="text-sm font-medium mb-1">{viewMode}</span>
+          <label
+            htmlFor="toggleViewMode"
+            className="inline-flex relative items-center cursor-pointer"
+          >
+            <input
+              type="checkbox"
+              id="toggleViewMode"
+              className="sr-only peer"
+              onChange={toggleViewMode}
+              checked={viewMode === "Binder"}
+            />
+            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 transition-colors duration-300"></div>
+            <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 transform peer-checked:translate-x-5"></div>
+          </label>
+        </div>
+      </div>
 
       {/* Top Bar with Expansion Dropdown & Stats */}
       <div className="flex justify-between mb-4">
-        {/* Left Side: Stats Box (Taller & Stretched) */}
+        {/* Left Side: Stats Box */}
         {stats && (
           <div className="flex flex-col bg-gray-100 p-4 rounded-lg shadow min-h-[80px] border border-gray-300 mr-2 self-stretch">
-            {/* Total Count */}
             <p className="font-bold mb-2">Total: {stats.total}</p>
-
-            {/* Rarity Icons Below */}
             <div className="flex space-x-3">
               {Object.entries(stats.rarities).map(([rarity, count]) => {
                 const rarityData = rarityMap[rarity] || { name: rarity };
@@ -99,7 +124,7 @@ export default function CollectionPage() {
                       <img
                         src={rarityData.image}
                         alt={rarityData.name}
-                        title={rarityData.name} // Hover tooltip
+                        title={rarityData.name}
                         className="w-4 h-4"
                       />
                     ) : (
@@ -113,7 +138,7 @@ export default function CollectionPage() {
           </div>
         )}
 
-        {/* Right Side: Expansion Dropdown (Aligned to Bottom) */}
+        {/* Right Side: Expansion Dropdown */}
         <div className="flex self-end">
           <select
             value={selectedExpansion}
@@ -163,7 +188,6 @@ export default function CollectionPage() {
                   </button>
                 </div>
               </td>
-
               <td className="p-2">{card.name}</td>
               <td className="p-2">{card.type}</td>
               <td className="p-2">{card.color || "N/A"}</td>
@@ -191,6 +215,7 @@ export default function CollectionPage() {
           ))}
         </tbody>
       </table>
+
       {/* Modal for card details */}
       <Transition show={!!selectedCard} as={Fragment}>
         <Dialog
@@ -198,26 +223,20 @@ export default function CollectionPage() {
           className="relative z-50"
           onClose={() => setSelectedCard(null)}
         >
-          {/* This is the dimmed background effect */}
           <div className="fixed inset-0 bg-black/20 backdrop-blur-md" />
-
           <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
             <Dialog.Panel className="bg-white p-6 rounded-lg shadow-lg max-w-3xl w-full relative">
-              {/* Close Button */}
               <button
                 onClick={() => setSelectedCard(null)}
                 className="absolute top-2 right-2 text-gray-600 hover:text-black text-xl"
               >
                 ✕
               </button>
-
-              {/* Card Image (3x size) */}
               <img
                 src={selectedCard?.image_url}
                 alt={selectedCard?.name}
                 className="w-full h-[500px] object-contain"
               />
-
               <h2 className="text-2xl font-bold mt-4">{selectedCard?.name}</h2>
               <p className="text-sm text-gray-500">
                 #{selectedCard?.number} - {selectedCard?.rarity || "Common"}

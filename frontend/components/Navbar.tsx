@@ -21,6 +21,8 @@ export default function Navbar() {
             Expansions
           </Link>
           <Link href="/search" className="hover:text-gray-300">Search</Link>
+          <Link href="/settings" className="hover:text-gray-300">Settings</Link>
+          
         </div>
       </div>
     </nav>

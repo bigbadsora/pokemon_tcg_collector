@@ -374,3 +374,100 @@ def update_card_quantity(card_id, change):
     conn.close()
     return True
 
+def update_expansions():
+    """Check for new expansions from PokémonTCG API, update the database, and fetch associated cards for new expansions."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Get IDs of current expansions in the database
+    current_ids = {row["id"] for row in cursor.execute("SELECT id FROM expansions")}
+    
+    # Fetch expansions from API
+    response = requests.get(POKEMON_TCG_API_URL, headers=HEADERS)
+    if response.status_code != 200:
+        print(f"❌ Failed to fetch expansions: {response.status_code}")
+        conn.close()
+        return
+    
+    api_expansions = response.json().get("data", [])
+    if not api_expansions:
+        print("No expansions found in API response.")
+        conn.close()
+        return
+
+    # Identify new expansions not present in the DB
+    new_expansions = [exp for exp in api_expansions if exp["id"] not in current_ids]
+    
+    if new_expansions:
+        # Insert new expansions into the database
+        cursor.executemany("""
+            INSERT INTO expansions (
+                id, name, series, printed_total, total, legal_unlimited, legal_standard, legal_expanded, 
+                ptcgo_code, release_date, updated_at, symbol_url, logo_url
+            ) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, [
+            (
+                exp["id"],
+                exp["name"],
+                exp["series"],
+                exp.get("printedTotal"),
+                exp.get("total"),
+                exp["legalities"].get("unlimited"),
+                exp["legalities"].get("standard"),
+                exp["legalities"].get("expanded"),
+                exp.get("ptcgoCode"),
+                exp["releaseDate"],
+                exp.get("updatedAt"),
+                exp["images"]["symbol"],
+                exp["images"]["logo"]
+            )
+            for exp in new_expansions
+        ])
+        conn.commit()
+        print(f"✔ {len(new_expansions)} new expansion(s) added to the database!")
+        conn.close()
+
+        # For each new expansion, fetch its associated cards
+        for exp in new_expansions:
+            result = fetch_cards_for_expansion(exp["id"])
+            if result.get("success"):
+                print(f"✔ Cards fetched for expansion {exp['id']}")
+            else:
+                print(f"❌ Failed to fetch cards for expansion {exp['id']}: {result.get('error')}")
+    else:
+        print("✅ No new expansions to update.")
+        conn.close()
+
+
+def fetch_cards_for_expansion(expansion_id: str):
+    """Fetch cards for a specific expansion by its ID from the API and store them in the database."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    response = requests.get(f"https://api.pokemontcg.io/v2/cards?q=set.id:{expansion_id}", headers=HEADERS)
+    if response.status_code != 200:
+        conn.close()
+        print(f"❌ Failed to fetch cards for {expansion_id}: {response.status_code}")
+        return {"success": False, "error": f"API request failed with status code {response.status_code}"}
+    
+    cards = response.json().get("data", [])
+    if not cards:
+        conn.close()
+        print(f"❌ No cards found for expansion {expansion_id}.")
+        return {"success": False, "error": "No cards found in API response."}
+    
+    cursor.executemany("""
+        INSERT OR IGNORE INTO cards (id, name, expansion_id, number, rarity, supertype, subtype, hp, types, evolves_from, image_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, [
+        (
+            card["id"], card["name"], card["set"]["id"], card["number"], card.get("rarity"),
+            card["supertype"], ",".join(card.get("subtypes", [])), card.get("hp"),
+            ",".join(card.get("types", [])), card.get("evolvesFrom"), card["images"]["small"]
+        ) for card in cards
+    ])
+    conn.commit()
+    conn.close()
+    print(f"✔ {len(cards)} cards added for expansion {expansion_id}")
+    return {"success": True, "message": f"{len(cards)} cards added for expansion {expansion_id}"}
