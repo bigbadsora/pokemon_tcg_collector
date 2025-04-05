@@ -3,13 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const TotalCardsWidget: React.FC = () => {
   const [totalCards, setTotalCards] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/widgets/totalCards')
+    fetch(BACKEND_URL + '/widgets/totalCards')
       .then((res) => res.json())
       .then((data) => setTotalCards(data.totalCards))
       .catch((err) => console.error('Error fetching total cards:', err));
@@ -27,7 +29,7 @@ const TotalExpansionsWidget: React.FC = () => {
   const [totalExpansions, setTotalExpansions] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/widgets/totalExpansions')
+    fetch(BACKEND_URL + '/widgets/totalExpansions')
       .then((res) => res.json())
       .then((data) => setTotalExpansions(data.totalExpansions))
       .catch((err) => console.error('Error fetching total expansions:', err));
@@ -45,7 +47,7 @@ const CardsByExpansionWidget: React.FC = () => {
   const [chartData, setChartData] = useState<any>(null);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/widgets/cardsByExpansion')
+    fetch(BACKEND_URL + '/widgets/cardsByExpansion')
       .then((res) => res.json())
       .then((data) => {
         // Assume data is an array like:

@@ -6,12 +6,13 @@ from typing import List, Dict
 
 load_dotenv()
 
+DATABASE_PATH = os.getenv("DATABASE_PATH", "pokemon.db")
 POKEMON_TCG_API_URL = "https://api.pokemontcg.io/v2/sets"
 API_KEY = os.getenv("POKEMON_TCG_API_KEY")
 HEADERS = {"X-Api-Key": API_KEY}
 
 def get_db_connection():
-    conn = sqlite3.connect("pokemon.db")
+    conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 

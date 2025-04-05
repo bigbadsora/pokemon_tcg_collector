@@ -63,3 +63,5 @@ backend/pokemon.db
 #personal files
 todo.txt
 *.command
+/backend_refactor_structure
+.DS_Store
