@@ -59,3 +59,7 @@ notes/
 # Database files
 *.db
 backend/pokemon.db
+
+#personal files
+todo.txt
+*.command
