@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from database import get_expansions, get_cards_by_expansion, get_cards_by_name, update_card_quantity, update_expansions
+import database as db
 
 app = FastAPI()
 
@@ -15,13 +15,13 @@ app.add_middleware(
 @app.get("/expansions/")
 def list_expansions():
     """Fetch a list of Pokémon TCG expansions."""
-    expansions = get_expansions()
+    expansions = db.get_expansions()
     return {"expansions": expansions}
 
 @app.get("/expansion/{set_id}/cards")
 def list_cards(set_id: str):
     """Fetch all cards in a specific expansion."""
-    cards = get_cards_by_expansion(set_id)
+    cards = db.get_cards_by_expansion(set_id)
     if not cards:
         raise HTTPException(status_code=404, detail="Expansion not found or no cards available")
     return {"cards": cards}
@@ -33,7 +33,7 @@ def search_cards(
     type_: str = Query(None)  # `type_` because `type` is a reserved Python keyword
 ):
     """Search for cards by name with optional rarity and type filters."""
-    cards = get_cards_by_name(q, rarity, type_)
+    cards = db.get_cards_by_name(q, rarity, type_)
     return {"cards": cards}
 
 @app.get("/collection/")
@@ -52,7 +52,7 @@ def get_collection_for_expansion(expansion_id: str):
 @app.post("/collection/update/")
 def update_collection(card_id: str, change: int):
     """Update the quantity of a card in the collection."""
-    result = update_card_quantity(card_id, change)
+    result = db.update_card_quantity(card_id, change)
     if not result:
         raise HTTPException(status_code=400, detail="Failed to update quantity")
     return {"message": "Quantity updated"}
@@ -61,7 +61,7 @@ def update_collection(card_id: str, change: int):
 def update_expansions_endpoint():
     """Endpoint to update expansions by checking for new releases from the PokémonTCG API."""
     try:
-        update_expansions()
+        db.update_expansions()
         return {"message": "Expansions updated successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -74,3 +74,35 @@ def update_expansion_cards(set_id: str):
     if not result.get("success"):
         raise HTTPException(status_code=400, detail=result.get("error", "Failed to fetch cards."))
     return result
+
+#Widget endpoints
+@app.get("/api/widgets/totalCards")
+def total_cards_endpoint():
+    """
+    Endpoint to get the total number of cards in the user's collection.
+    Response format: { "totalCards": <number> }
+    """
+    total = db.get_total_cards_collection()
+    return {"totalCards": total}
+
+@app.get("/api/widgets/totalExpansions")
+def total_expansions_endpoint():
+    """
+    Endpoint to get the total number of expansions collected.
+    Response format: { "totalExpansions": <number> }
+    """
+    total = db.get_total_expansions_collection()
+    return {"totalExpansions": total}
+
+@app.get("/api/widgets/cardsByExpansion")
+def cards_by_expansion_endpoint():
+    """
+    Endpoint to get a breakdown of the cards by expansion.
+    Response format: [
+        { "expansionName": "Base Set", "cardCount": 42 },
+        { "expansionName": "Jungle", "cardCount": 17 },
+         ...
+    ]
+    """
+    data = db.get_cards_by_expansion_collection()
+    return data

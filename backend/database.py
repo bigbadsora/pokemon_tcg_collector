@@ -2,6 +2,7 @@ import sqlite3
 import requests
 import os
 from dotenv import load_dotenv
+from typing import List, Dict
 
 load_dotenv()
 
@@ -471,3 +472,50 @@ def fetch_cards_for_expansion(expansion_id: str):
     conn.close()
     print(f"✔ {len(cards)} cards added for expansion {expansion_id}")
     return {"success": True, "message": f"{len(cards)} cards added for expansion {expansion_id}"}
+
+#Widget functions
+def get_total_cards_collection() -> int:
+    """
+    Returns the total number of cards in the user's collection.
+    This sums up the "quantity" field in the collection table.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT SUM(quantity) FROM collection")
+    result = cursor.fetchone()[0]
+    conn.close()
+    # If there are no cards, return 0
+    return result if result is not None else 0
+
+def get_total_expansions_collection() -> int:
+    """
+    Returns the number of expansions in which the user has collected at least one card.
+    This counts distinct expansion_id values from the collection table where quantity > 0.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(DISTINCT expansion_id) FROM collection WHERE quantity > 0")
+    result = cursor.fetchone()[0]
+    conn.close()
+    return result if result is not None else 0
+
+def get_cards_by_expansion_collection() -> List[Dict[str, int]]:
+    """
+    Returns a breakdown of the total cards collected grouped by expansion.
+    It joins the collection table with the expansions table to get the expansion names.
+    Output format: [{"expansionName": "Base Set", "cardCount": 42}, ...]
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT e.name AS expansionName, SUM(c.quantity) AS cardCount
+        FROM collection c
+        JOIN expansions e ON c.expansion_id = e.id
+        WHERE c.quantity > 0
+        GROUP BY c.expansion_id
+    """)
+    results = cursor.fetchall()
+    conn.close()
+    return [{"expansionName": row["expansionName"], "cardCount": row["cardCount"]} for row in results]
+
+    
