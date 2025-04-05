@@ -7,6 +7,8 @@ interface Expansion {
 }
 
 export default function Settings() {
+  const [activeTab, setActiveTab] = useState("dataManagement");
+
   const [loadingUpdateExpansions, setLoadingUpdateExpansions] = useState(false);
   const [updateExpansionsMessage, setUpdateExpansionsMessage] = useState("");
   const [loadingUpdateCards, setLoadingUpdateCards] = useState(false);
@@ -21,7 +23,7 @@ export default function Settings() {
         const res = await fetch("http://localhost:8000/expansions/");
         if (res.ok) {
           const data = await res.json();
-          // Assuming the response groups expansions by series, flatten them into a single array.
+          // Flatten expansions if grouped by series
           const expArray: Expansion[] = [];
           const expansionsObj = data.expansions;
           for (const series in expansionsObj) {
@@ -30,8 +32,8 @@ export default function Settings() {
             });
           }
           setExpansions(expArray);
-          if(expArray.length > 0) {
-              setSelectedExpansion(expArray[0].id);
+          if (expArray.length > 0) {
+            setSelectedExpansion(expArray[0].id);
           }
         }
       } catch (error) {
@@ -41,7 +43,7 @@ export default function Settings() {
     fetchExpansions();
   }, []);
 
-  // Existing Update Expansions functionality (if you want to keep it)
+  // Handler: Update Expansions
   const handleUpdateExpansions = async () => {
     setLoadingUpdateExpansions(true);
     setUpdateExpansionsMessage("");
@@ -54,7 +56,9 @@ export default function Settings() {
         setUpdateExpansionsMessage("Error: " + errorData.detail);
       } else {
         const data = await res.json();
-        setUpdateExpansionsMessage(data.message || "Expansions updated successfully!");
+        setUpdateExpansionsMessage(
+          data.message || "Expansions updated successfully!"
+        );
       }
     } catch (err: any) {
       setUpdateExpansionsMessage("Error: " + err.message);
@@ -62,21 +66,26 @@ export default function Settings() {
     setLoadingUpdateExpansions(false);
   };
 
-  // New handler for fetching missing cards for a chosen expansion
+  // Handler: Fetch missing cards for the chosen expansion
   const handleUpdateMissingCards = async () => {
     if (!selectedExpansion) return;
     setLoadingUpdateCards(true);
     setUpdateCardsMessage("");
     try {
-      const res = await fetch(`http://localhost:8000/expansion/${selectedExpansion}/cards/update`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `http://localhost:8000/expansion/${selectedExpansion}/cards/update`,
+        {
+          method: "POST",
+        }
+      );
       if (!res.ok) {
         const errorData = await res.json();
         setUpdateCardsMessage("Error: " + errorData.detail);
       } else {
         const data = await res.json();
-        setUpdateCardsMessage(data.message || "Cards updated successfully!");
+        setUpdateCardsMessage(
+          data.message || "Cards updated successfully!"
+        );
       }
     } catch (err: any) {
       setUpdateCardsMessage("Error: " + err.message);
@@ -85,48 +94,120 @@ export default function Settings() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center space-y-6">
-      <h1 className="text-4xl font-bold mb-4">Settings</h1>
-      
-      {/* Update Expansions Section */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-2">Update Expansions</h2>
-        <button
-          onClick={handleUpdateExpansions}
-          className="bg-green-600 text-white px-6 py-2 rounded-lg shadow-md hover:bg-green-700 transition"
-          disabled={loadingUpdateExpansions}
-        >
-          {loadingUpdateExpansions ? "Updating..." : "Update Expansions"}
-        </button>
-        {updateExpansionsMessage && <p className="mt-4 text-lg">{updateExpansionsMessage}</p>}
-      </div>
+    <div className="flex flex-col min-h-screen">
+      {/* 
+        If you have a Navbar and Footer already, keep them in your layout.
+        Below is the main content area with your "Settings" page.
+      */}
+      <main className="flex-grow flex flex-col items-center justify-start text-center px-4 py-8">
+        <h1 className="text-4xl font-bold mb-6">Settings</h1>
 
-      {/* Fetch Missing Cards for Selected Expansion Section */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-2">Fetch Missing Cards for Expansion</h2>
-        <div className="mb-4">
-          <label className="block mb-2 font-medium">Select Expansion:</label>
-          <select
-            value={selectedExpansion}
-            onChange={(e) => setSelectedExpansion(e.target.value)}
-            className="border border-gray-300 rounded px-4 py-2"
-          >
-            {expansions.map((exp) => (
-              <option key={exp.id} value={exp.id}>
-                {exp.name} ({exp.id})
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Tabs (Top navigation for categories) */}
+        <div className="border-b border-gray-300 flex space-x-6 mb-6">
         <button
-          onClick={handleUpdateMissingCards}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-700 transition"
-          disabled={loadingUpdateCards}
-        >
-          {loadingUpdateCards ? "Fetching..." : "Fetch Missing Cards"}
-        </button>
-        {updateCardsMessage && <p className="mt-4 text-lg">{updateCardsMessage}</p>}
-      </div>
+            className={`pb-2 ${
+              activeTab === "settingsGeneral"
+                ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+            onClick={() => setActiveTab("settingsGeneral")}
+          >
+            General
+          </button>
+          <button
+            className={`pb-2 ${
+              activeTab === "dataManagement"
+                ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+            onClick={() => setActiveTab("dataManagement")}
+          >
+            Data Management
+          </button>
+
+          {/* 
+            If you add more categories later, add more <button> elements here,
+            e.g. "General", "Security", "Billing", etc.
+          */}
+        </div>
+
+        {/* Content for the "Data Management" tab */}
+        {activeTab === "dataManagement" && (
+          <div className="w-full max-w-4xl">
+            <div className="overflow-x-auto border border-gray-300 rounded-lg">
+              <table className="min-w-full bg-white text-left">
+                <thead className="border-b bg-gray-50">
+                  <tr>
+                    <th className="py-3 px-4 font-semibold">Option</th>
+                    <th className="py-3 px-4 font-semibold">Action</th>
+                    <th className="py-3 px-4 font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* Row: Update Expansions */}
+                  <tr className="border-b">
+                    <td className="py-4 px-4">Update Expansions</td>
+                    <td className="py-4 px-4">
+                      <button
+                        onClick={handleUpdateExpansions}
+                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+                        disabled={loadingUpdateExpansions}
+                      >
+                        {loadingUpdateExpansions ? "Updating..." : "Update"}
+                      </button>
+                    </td>
+                    <td className="py-4 px-4">
+                      {updateExpansionsMessage && (
+                        <span>{updateExpansionsMessage}</span>
+                      )}
+                    </td>
+                  </tr>
+
+                  {/* Row: Fetch Missing Cards */}
+                  <tr>
+                    <td className="py-4 px-4">Fetch Missing Cards</td>
+                    <td className="py-4 px-4">
+                      {/* Expansion Select */}
+                      <div className="flex flex-col md:flex-row items-start md:items-center mb-2">
+                        <label className="block md:mr-2 font-medium mb-2 md:mb-0">
+                          Expansion:
+                        </label>
+                        <select
+                          value={selectedExpansion}
+                          onChange={(e) => setSelectedExpansion(e.target.value)}
+                          className="border border-gray-300 rounded px-4 py-2"
+                        >
+                          {expansions.map((exp) => (
+                            <option key={exp.id} value={exp.id}>
+                              {exp.name} ({exp.id})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <button
+                        onClick={handleUpdateMissingCards}
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                        disabled={loadingUpdateCards}
+                      >
+                        {loadingUpdateCards ? "Fetching..." : "Fetch Cards"}
+                      </button>
+                    </td>
+                    <td className="py-4 px-4">
+                      {updateCardsMessage && (
+                        <span>{updateCardsMessage}</span>
+                      )}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Footer (if you have one) */}
+      {/* <footer> ... </footer> */}
     </div>
   );
 }
