@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 interface Expansion {
   id: string;
   name: string;
@@ -17,7 +19,7 @@ export default function Expansions() {
   const [expansions, setExpansions] = useState<ExpansionsGrouped>({});
 
   useEffect(() => {
-    fetch("http://localhost:8000/expansions/")
+    fetch(BACKEND_URL + "/expansions/")
       .then((res) => res.json())
       .then((data) => {
         if (data.expansions) {

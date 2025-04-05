@@ -3,6 +3,8 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { rarityMap } from "@/config/rarities";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 interface Card {
   card_id: string;
   name: string;
@@ -44,7 +46,7 @@ export default function CollectionPage() {
   };
 
   useEffect(() => {
-    fetch("http://localhost:8000/expansions/")
+    fetch(BACKEND_URL + "/expansions/")
       .then((res) => res.json())
       .then((data) => {
         const expansionList = Object.values(
@@ -57,7 +59,7 @@ export default function CollectionPage() {
 
   useEffect(() => {
     if (!selectedExpansion) return;
-    fetch(`http://localhost:8000/collection/${selectedExpansion}/`)
+    fetch(BACKEND_URL + `/collection/${selectedExpansion}/`)
       .then((res) => res.json())
       .then((data) => {
         setCollection(data.collection);
@@ -67,7 +69,7 @@ export default function CollectionPage() {
 
   const updateQuantity = async (cardId: string, change: number) => {
     await fetch(
-      `http://localhost:8000/collection/update/?card_id=${cardId}&change=${change}`,
+      BACKEND_URL + `/collection/update/?card_id=${cardId}&change=${change}`,
       {
         method: "POST",
       }

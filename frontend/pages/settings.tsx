@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 interface Expansion {
   id: string;
   name: string;
@@ -20,7 +22,7 @@ export default function Settings() {
   useEffect(() => {
     async function fetchExpansions() {
       try {
-        const res = await fetch("http://localhost:8000/expansions/");
+        const res = await fetch(BACKEND_URL + "/expansions/");
         if (res.ok) {
           const data = await res.json();
           // Flatten expansions if grouped by series
@@ -48,7 +50,7 @@ export default function Settings() {
     setLoadingUpdateExpansions(true);
     setUpdateExpansionsMessage("");
     try {
-      const res = await fetch("http://localhost:8000/expansions/update/", {
+      const res = await fetch(BACKEND_URL + "/expansions/update/", {
         method: "POST",
       });
       if (!res.ok) {
@@ -73,7 +75,7 @@ export default function Settings() {
     setUpdateCardsMessage("");
     try {
       const res = await fetch(
-        `http://localhost:8000/expansion/${selectedExpansion}/cards/update`,
+        BACKEND_URL + `/expansion/${selectedExpansion}/cards/update`,
         {
           method: "POST",
         }

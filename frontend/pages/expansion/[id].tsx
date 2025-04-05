@@ -3,6 +3,8 @@ import { useRouter } from "next/router";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 interface Card {
   id: string;
   name: string;
@@ -25,7 +27,7 @@ export default function ExpansionDetail() {
 
   useEffect(() => {
     if (id) {
-      fetch(`http://localhost:8000/expansion/${id}/cards`)
+      fetch(BACKEND_URL + `/expansion/${id}/cards`)
         .then((res) => res.json())
         .then((data) => {
           setCards(data.cards);

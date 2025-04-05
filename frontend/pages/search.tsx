@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 interface Card {
   id: string;
   name: string;
@@ -27,7 +29,7 @@ export default function SearchPage() {
     if (query.length < 1) return;
 
     setLoading(true);
-    let url = `http://localhost:8000/search/cards/?q=${query}`;
+    let url = BACKEND_URL + `/search/cards/?q=${query}`;
     if (rarity) url += `&rarity=${rarity}`;
     if (type_) url += `&type_=${type_}`;
 
