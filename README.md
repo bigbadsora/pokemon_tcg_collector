@@ -1,0 +1,1 @@
+This project is a fan-made tool. Pokémon and Pokémon TCG are trademarks of The Pokémon Company, Nintendo, Game Freak, and Creatures. This project is not affiliated with or endorsed by them.
