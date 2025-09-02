@@ -77,3 +77,23 @@ npm run dev
 * `DATABASE_PATH` → path to SQLite DB
     * Docker: `/app/data/app.db` (volume; seeded on first run)
     * Manual dev: `backend/seed/pokemon.db` (or any local path)
+
+## 🗺 Roadmap
+* v0.2: Binder view, more filters, UX polish
+* Future: Pricing integration (e.g., TCGPlayer), better search, migrations
+
+## 📷 Screenshots
+**Home Dashboard**
+<img width="1424" height="740" alt="Home Dashboard" src="https://github.com/user-attachments/assets/987c7caf-ee55-45c7-8f98-84593816c79a" />
+
+**Collection Table with Rarity Key**
+<img width="1467" height="700" alt="Collection Table with Quantities" src="https://github.com/user-attachments/assets/94ae61c4-60e2-42a4-ac13-d4414eff58ae" />
+
+**Expansion Viewer**
+<img width="1418" height="861" alt="Expansion Viewer" src="https://github.com/user-attachments/assets/577cf6a8-40d1-452a-8e80-4cc7bb46a34f" />
+
+**Card Detail View**
+<img width="1359" height="829" alt="Card Detail View" src="https://github.com/user-attachments/assets/186f5674-66f0-4807-850a-41e5ebff1246" />
+
+**Search**
+<img width="1388" height="766" alt="Search" src="https://github.com/user-attachments/assets/8f26ca14-ed6f-46fb-b5e9-ecd1f819924c" />
