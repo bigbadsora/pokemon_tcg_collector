@@ -78,6 +78,28 @@ npm run dev
     * Docker: `/app/data/app.db` (volume; seeded on first run)
     * Manual dev: `backend/seed/pokemon.db` (or any local path)
 
+**Pokémon TCG API**
+
+Some features (like refreshing expansion/set data) use the [Pokémon TCG API](https://pokemontcg.io/).  
+You will need to **bring your own API key**:
+
+1. Sign up at [pokemontcg.io](https://pokemontcg.io/) to get a free API key.
+2. Add it to your environment:
+
+   - **Docker Compose**: add to `backend` service in `docker-compose.yml`:
+     ```yaml
+     environment:
+       DATABASE_PATH: /app/data/app.db
+       POKEMON_TCG_API_KEY: your-api-key-here
+     ```
+
+   - **Manual dev**: in `backend/.env`:
+     ```bash
+     POKEMON_TCG_API_KEY=your-api-key-here
+     ```
+
+If no key is provided, the backend will fall back to unauthenticated requests, which are **rate-limited**. 
+
 ## 🗺 Roadmap
 * v0.2: Binder view, more filters, UX polish
 * Future: Pricing integration (e.g., TCGPlayer), better search, migrations
