@@ -56,13 +56,13 @@ lerna-debug.log*
 # Notes
 notes/
 
-# Database files
-*.db
-backend/pokemon.db
-
 #personal files
 todo.txt
 *.command
 /backend_refactor_structure
 .DS_Store
 backend/.env
+
+# Keep the committed seed DB
+!backend/seed/
+!backend/seed/pokemon.db
