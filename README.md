@@ -20,6 +20,8 @@ git clone https://github.com/bigbadsora/pokemon_tcg_collector.git
 cd pokemon_tcg_collector
 
 # Build & run (first run seeds the DB automatically)
-docker compose up --build```
+docker compose up --build
+
+
 
 
